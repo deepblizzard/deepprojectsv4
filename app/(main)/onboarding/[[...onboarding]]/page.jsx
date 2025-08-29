@@ -1,24 +1,25 @@
-// app/onboarding/page.tsx
-import { auth, currentOrganization } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { OrganizationList } from "@clerk/nextjs";
+'use client';
 
-export default async function OnboardingPage() {
-  const { orgId, userId } = auth();
+import { OrganizationList, useOrganization } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-  if (!userId) redirect("/sign-in"); // redirect if not signed in
+export default function Onboarding() {
+  const { organization } = useOrganization();
+  const router = useRouter();
 
-  if (orgId) {
-    const org = await currentOrganization();
-    if (org) redirect(`/organization/${org.slug}`); // redirect if org exists
-  }
+  useEffect(() => {
+    if (organization) {
+      router.push(`/organization/${organization.slug}`);
+    }
+  }, [organization, router]);
 
   return (
     <div className="flex justify-center items-center pt-14">
       <OrganizationList
         hidePersonal
-        afterCreateOrganizationUrl="/onboarding"
-        afterSelectOrganizationUrl="/onboarding"
+        afterCreateOrganizationUrl={(org) => `/organization/${org.slug}`}
+        afterSelectOrganizationUrl={(org) => `/organization/${org.slug}`}
       />
     </div>
   );
